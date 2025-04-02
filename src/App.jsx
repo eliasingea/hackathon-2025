@@ -29,6 +29,9 @@ const evaluateNextStep = (state) => {
       code: state.transformations.code,
     };
   }
+  if (!state.intent && state.history.length > 0) {
+    return "get_more_information";
+  }
   return {
     step: "generate_new_transformation",
     description: state.entities.transformationRequest,
@@ -67,10 +70,13 @@ const generateBotMessage = async (state) => {
   };
 
   if (typeof stepResult === "string") {
-    const prompt =
-      stepResult === "ask_transformation_description"
-        ? "What kind of transformation are you trying to accomplish?"
-        : "I'm not sure how to help yet.";
+    let prompt = '';
+    if (stepResult === "ask_transformation_description") {
+      prompt = 'What kind of transformation are you trying to accomplish?';
+    } else {
+      state.intent = true;
+      prompt = 'Can you describe in detail what transformation you want and I can generate one for you?';
+    }
     return { ...message, text: prompt };
   } else if (stepResult.step === "show_existing_transformation") {
     return {
