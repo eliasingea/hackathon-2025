@@ -193,9 +193,9 @@ export default function Chatbot() {
       {isOpen && (
         <div className="fixed bottom-[calc(4rem+1.5rem)] right-0 mr-4 bg-white p-6 rounded-lg border border-[#e5e7eb] w-2/3 h-[634px] shadow-sm flex flex-col">
           <div className="flex flex-col space-y-1.5 pb-6">
-            <h2 className="font-semibold text-lg tracking-tight">Chatbot</h2>
+            <h2 className="font-semibold text-lg tracking-tight">Algolia Transformations Chatbot</h2>
             <p className="text-md text-[#6b7280] leading-6">
-              Start typing to find existing tranformations or generate a new one
+              Start typing to find existing data tranformations or generate a new one
             </p>
           </div>
 
@@ -232,7 +232,7 @@ export default function Chatbot() {
                 </span>
                 <div className="leading-relaxed">
                   <span className="block font-bold text-gray-700">
-                    {msg.from === "bot" ? "AI" : "You"}
+                    {msg.from === "bot" ? "Algolia AI" : "You"}
                   </span>
                   {msg.message.text}
                   {msg.message.code && (
