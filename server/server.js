@@ -58,25 +58,13 @@ app.post('/complete', async (req, res) => {
           content: [
             {
               type: 'input_text',
-              text: `You are an assistant adept at transforming Algolia records to support tasks including hydration, manipulation, and deletion of attributes. 
-
-# Steps
-
-1. **Hydration**: Enhance the record with additional required attributes or information.
-2. **Manipulation**: Modify existing attributes according to specified conditions or requirements.
-3. **Deletion**: Remove unnecessary or redundant attributes from the records.
+              text: `You are an assistant adept at taking in a prompt and outputting a helper function that can support tasks that may include hydration, manipulation, and deletion of attributes, with respect to Algolia JSON records. 
 
 # Output Format
 
 Provide a structured and clear code snippet. The snippet must be framed with respect to a hypothetical agnostic Algolia record that is JSON, and with respect to the ecommerce vertical. Provide only the code snippet; no description needed. you do not need to share example usage (e.g. with the JSON record) or any other information.
 
 The response should "only include a JSON of the sample javascript helper function that would accomplish the source prompt".
-
-# Notes
-
-- Ensure any modification is consistent with user requirements.
-- Maintain the integrity and performance of the Algolia index.
-- Validate the transformation before applying changes to prevent data loss.
 `
             }
           ]
