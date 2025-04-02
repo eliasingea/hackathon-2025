@@ -120,7 +120,8 @@ export default function Chatbot() {
   }, [input]);
 
   const handleSend = async (input) => {
-    console.log("Sending message:", input);
+    setSuggestions([]);
+
     let newState = { ...state };
 
     let selectedText = "";
