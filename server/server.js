@@ -68,7 +68,7 @@ app.post('/complete', async (req, res) => {
 
 # Output Format
 
-Provide a structured and clear code snippet. The snippet must be framed with respect to a hypothetical Algolia record that is JSON, and with respect to the ecommerce vertical. Provide only the code snippet; no description needed.
+Provide a structured and clear code snippet. The snippet must be framed with respect to a hypothetical agnostic Algolia record that is JSON, and with respect to the ecommerce vertical. Provide only the code snippet; no description needed. you do not need to share example usage (e.g. with the JSON record) or any other information.
 
 The response should "only include a JSON of the sample javascript helper function that would accomplish the source prompt".
 
