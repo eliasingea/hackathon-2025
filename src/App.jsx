@@ -16,7 +16,10 @@ const initialState = {
 };
 
 const evaluateNextStep = (state) => {
-  if (!state.entities.transformationRequest || state.entities.transformationRequest.length < 6) {
+  if (
+    !state.entities.transformationRequest ||
+    state.entities.transformationRequest.length < 6
+  ) {
     return "ask_transformation_description";
   }
   console.log(state);
@@ -34,44 +37,57 @@ const evaluateNextStep = (state) => {
 
 const generateAITransformation = async (description) => {
   // Placeholder for real AI logic or API call
-  const url = "http://localhost:3000/generate";
+  const url = "/api/complete";
   try {
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ description }),
+      body: JSON.stringify({ prompt: description }),
     });
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
+    if (response.ok) {
+      const data = await response.json();
+      return data.output_text;
+    }
   } catch (error) {
     console.error("Error generating transformation:", error);
+    return `// Error generating transformation: ${error.message}`;
   }
-
-  return `// AI-generated transformation based on: ${description}\nconst result = /* AI logic here */;`;
 };
 
 const generateBotMessage = async (state) => {
   const stepResult = evaluateNextStep(state);
 
   let message = {
-    text: ''
+    text: "",
   };
 
   if (typeof stepResult === "string") {
-    const prompt = stepResult === "ask_transformation_description"
-      ? 'What kind of transformation are you trying to accomplish?' :
-      'I\'m not sure how to help yet.'
+    const prompt =
+      stepResult === "ask_transformation_description"
+        ? "What kind of transformation are you trying to accomplish?"
+        : "I'm not sure how to help yet.";
     return { ...message, text: prompt };
   } else if (stepResult.step === "show_existing_transformation") {
-    return { ...message, text: 'I found a transformation that matches your request:\n', code: stepResult.code };
+    return {
+      ...message,
+      text: "I found a transformation that matches your request:\n",
+      code: stepResult.code,
+    };
   } else if (stepResult.step === "generate_new_transformation") {
-    // const aiCode = await generateAITransformation(
-    //   state.entities.transformationRequest
-    // );
-    return { ...message, text: 'Here\'s a AI generated transformation based on your request:', code: '' };
+    const aiCode = await generateAITransformation(
+      state.entities.transformationRequest
+    );
+    console.log(aiCode);
+    return {
+      ...message,
+      text: "Here's a AI generated transformation based on your request:",
+      code: aiCode ? aiCode : "// No transformation found. Please try again.",
+    };
   }
 };
 
@@ -163,7 +179,9 @@ export default function Chatbot() {
         <div className="fixed bottom-[calc(4rem+1.5rem)] right-0 mr-4 bg-white p-6 rounded-lg border border-[#e5e7eb] w-2/3 h-[634px] shadow-sm flex flex-col">
           <div className="flex flex-col space-y-1.5 pb-6">
             <h2 className="font-semibold text-lg tracking-tight">Chatbot</h2>
-            <p className="text-md text-[#6b7280] leading-6">Start typing to find existing tranformations or generate a new one</p>
+            <p className="text-md text-[#6b7280] leading-6">
+              Start typing to find existing tranformations or generate a new one
+            </p>
           </div>
 
           <div
@@ -202,10 +220,17 @@ export default function Chatbot() {
                   </span>
                   {msg.message.text}
                   {msg.message.code && (
-                  <div>
-                    <pre className="mt-4 mb-2">{msg.message.code}</pre>
-                    <button className="outline-2 outline-blue-500" onClick={() => navigator.clipboard.writeText(msg.message.code)}>Copy</button>
-                  </div>
+                    <div>
+                      <pre className="mt-4 mb-2">{msg.message.code}</pre>
+                      <button
+                        className="outline-2 outline-blue-500"
+                        onClick={() =>
+                          navigator.clipboard.writeText(msg.message.code)
+                        }
+                      >
+                        Copy
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
