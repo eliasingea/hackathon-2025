@@ -26,7 +26,10 @@ const evaluateNextStep = (state) => {
       code: state.transformations.code,
     };
   }
-  return "generate_new_transformation";
+  return {
+    step: "generate_new_transformation",
+    description: state.entities.transformationRequest,
+  };
 };
 
 const generateAITransformation = async (description) => {
