@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { algoliasearch } from "algoliasearch";
 
 const searchClient = algoliasearch(
@@ -105,6 +105,8 @@ export default function Chatbot() {
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
+  const chatMessages = useRef(null);
+
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (input.trim().length > 1) {
@@ -150,6 +152,13 @@ export default function Chatbot() {
     };
     setLoading(false);
 
+    // scroll to the bottom after the messages are added to the DOM
+    setTimeout(() => {
+      if (chatMessages && chatMessages.current) {
+        chatMessages.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+      }
+    }, 10);
+
     setState({ ...newState, history: [...newState.history, botMessage] });
     setInput("");
     setSuggestions([]);
@@ -186,9 +195,9 @@ export default function Chatbot() {
       {isOpen && (
         <div className="fixed bottom-[calc(4rem+1.5rem)] right-0 mr-4 bg-white p-6 rounded-lg border border-[#e5e7eb] w-2/3 h-[634px] shadow-sm flex flex-col">
           <div className="flex flex-col space-y-1.5 pb-6">
-            <h2 className="font-semibold text-lg tracking-tight">Chatbot</h2>
+            <h2 className="font-semibold text-lg tracking-tight">Algolia Transformations Chatbot</h2>
             <p className="text-md text-[#6b7280] leading-6">
-              Start typing to find existing tranformations or generate a new one
+              Start typing to find existing data tranformations or generate a new one
             </p>
           </div>
 
@@ -198,6 +207,7 @@ export default function Chatbot() {
           >
             {state.history.map((msg, i) => (
               <div
+                ref={chatMessages}
                 key={i}
                 className="flex gap-3 my-4 text-gray-600 text-sm flex-1"
               >
@@ -224,14 +234,14 @@ export default function Chatbot() {
                 </span>
                 <div className="leading-relaxed">
                   <span className="block font-bold text-gray-700">
-                    {msg.from === "bot" ? "AI" : "You"}
+                    {msg.from === "bot" ? "Algolia AI" : "You"}
                   </span>
                   {msg.message.text}
                   {msg.message.code && (
                     <div>
                       <pre className="mt-4 mb-2">{msg.message.code}</pre>
                       <button
-                        className="outline-2 outline-blue-500"
+                        className="mb-2 outline-2 outline-blue-500"
                         onClick={() =>
                           navigator.clipboard.writeText(msg.message.code)
                         }
