@@ -6,47 +6,47 @@ const searchClient = algoliasearch(
   "8e0c05de6ee92174f50db39e199ec9b8"
 );
 const indexName = "prod_transformations_en";
-const knownTransformations = [
-  {
-    id: "1",
-    description: "Convert date string to ISO format",
-    code: "const isoDate = new Date(input).toISOString();",
-  },
-  {
-    id: "2",
-    description: "Capitalize the first letter of each word",
-    code: "const result = input.replace(/\bw/g, char => char.toUpperCase());",
-  },
-];
 
 const initialState = {
   userId: "123",
   history: [],
   intent: null,
   entities: {},
-  knownData: { transformations: knownTransformations },
+  transformations: {},
 };
 
 const evaluateNextStep = (state) => {
   if (!state.entities.transformationRequest) {
     return "ask_transformation_description";
   }
-
-  const match = state.knownData.transformations.find((t) =>
-    state.entities.transformationRequest
-      .toLowerCase()
-      .includes(t.description.toLowerCase())
-  );
-
-  if (match) {
-    return { step: "show_existing_transformation", match };
+  console.log(state);
+  if (state.transformations.code) {
+    return {
+      step: "show_existing_transformation",
+      code: state.transformations.code,
+    };
   }
-
   return "generate_new_transformation";
 };
 
 const generateAITransformation = async (description) => {
   // Placeholder for real AI logic or API call
+  const url = "http://localhost:3000/generate";
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ description }),
+    });
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Error generating transformation:", error);
+  }
+
   return `// AI-generated transformation based on: ${description}\nconst result = /* AI logic here */;`;
 };
 
@@ -58,10 +58,10 @@ const generateBotMessage = async (state) => {
       case "ask_transformation_description":
         return "What kind of transformation are you trying to accomplish?";
       case "generate_new_transformation": {
-        const aiCode = await generateAITransformation(
-          state.entities.transformationRequest
-        );
-        return `Here's a transformation based on your request:\n${aiCode}`;
+        // const aiCode = await generateAITransformation(
+        //   state.entities.transformationRequest
+        // );
+        return `Here's a transformation based on your request:\n${"aiCode"}`;
       }
       default:
         return "I'm not sure how to help yet.";
@@ -69,7 +69,7 @@ const generateBotMessage = async (state) => {
   }
 
   if (stepResult.step === "show_existing_transformation") {
-    return `I found a transformation that matches your request:\n${stepResult.match.code}`;
+    return `I found a transformation that matches your request:\n${stepResult.code}`;
   }
 };
 
@@ -101,9 +101,19 @@ export default function Chatbot() {
     fetchSuggestions();
   }, [input]);
 
-  const handleSend = async (selectedText = input) => {
+  const handleSend = async (input) => {
+    console.log("Sending message:", input);
+    let newState = { ...state };
+
+    let selectedText = "";
+    if (typeof input !== "string") {
+      newState.transformations.code = input.code;
+      selectedText = input.title;
+    } else {
+      selectedText = input;
+    }
     const userMessage = { from: "user", message: selectedText };
-    const newState = { ...state, history: [...state.history, userMessage] };
+    newState = { ...state, history: [...state.history, userMessage] };
     newState.entities.transformationRequest = selectedText;
 
     setLoading(true);
@@ -208,7 +218,7 @@ export default function Chatbot() {
               className="flex items-center justify-center w-full space-x-2"
               onSubmit={(e) => {
                 e.preventDefault();
-                handleSend();
+                handleSend(input);
               }}
             >
               <input
@@ -232,7 +242,7 @@ export default function Chatbot() {
                   <li
                     key={s.objectID || i}
                     className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-[#030712]"
-                    onClick={() => handleSend(s.title)}
+                    onClick={() => handleSend(s)}
                   >
                     {s.title}
                   </li>
