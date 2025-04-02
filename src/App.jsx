@@ -16,7 +16,7 @@ const initialState = {
 };
 
 const evaluateNextStep = (state) => {
-  if (!state.entities.transformationRequest) {
+  if (!state.entities.transformationRequest || state.entities.transformationRequest.length < 6) {
     return "ask_transformation_description";
   }
   console.log(state);
@@ -61,22 +61,17 @@ const generateBotMessage = async (state) => {
   };
 
   if (typeof stepResult === "string") {
-    switch (stepResult) {
-      case "ask_transformation_description":
-        return { ...message, text: 'What kind of transformation are you trying to accomplish?' };
-      case "generate_new_transformation": {
-        // const aiCode = await generateAITransformation(
-        //   state.entities.transformationRequest
-        // );
-        return { ...message, text: 'Here\'s a transformation based on your request:', code: '' };
-      }
-      default:
-        return { ...message, text: 'I\'m not sure how to help yet.' };
-    }
-  }
-
-  if (stepResult.step === "show_existing_transformation") {
+    const prompt = stepResult === "ask_transformation_description"
+      ? 'What kind of transformation are you trying to accomplish?' :
+      'I\'m not sure how to help yet.'
+    return { ...message, text: prompt };
+  } else if (stepResult.step === "show_existing_transformation") {
     return { ...message, text: 'I found a transformation that matches your request:\n', code: stepResult.code };
+  } else if (stepResult.step === "generate_new_transformation") {
+    // const aiCode = await generateAITransformation(
+    //   state.entities.transformationRequest
+    // );
+    return { ...message, text: 'Here\'s a AI generated transformation based on your request:', code: '' };
   }
 };
 
@@ -118,9 +113,10 @@ export default function Chatbot() {
       selectedText = input.title;
     } else {
       selectedText = input;
+      newState = { ...newState, entities: {}, transformations: {} };
     }
     const userMessage = { from: "user", message: { text: selectedText } };
-    newState = { ...state, history: [...state.history, userMessage] };
+    newState = { ...newState, history: [...state.history, userMessage] };
     newState.entities.transformationRequest = selectedText;
 
     setLoading(true);
