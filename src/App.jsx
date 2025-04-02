@@ -15,6 +15,7 @@ const initialState = {
   transformations: {},
 };
 
+//evaluate the transfomation steps
 const evaluateNextStep = (state) => {
   if (
     !state.entities.transformationRequest ||
@@ -22,7 +23,6 @@ const evaluateNextStep = (state) => {
   ) {
     return "ask_transformation_description";
   }
-  console.log(state);
   if (state.transformations.code) {
     return {
       step: "show_existing_transformation",
@@ -39,7 +39,7 @@ const evaluateNextStep = (state) => {
 };
 
 const generateAITransformation = async (description) => {
-  // Placeholder for real AI logic or API call
+  //call the backend to generate the transformation
   const url = "/api/complete";
   try {
     const response = await fetch(url, {
@@ -89,7 +89,6 @@ const generateBotMessage = async (state) => {
     const aiCode = await generateAITransformation(
       state.entities.transformationRequest
     );
-    console.log(aiCode);
     return {
       ...message,
       text: "Here's a AI generated transformation based on your request:",
@@ -155,7 +154,11 @@ export default function Chatbot() {
     // scroll to the bottom after the messages are added to the DOM
     setTimeout(() => {
       if (chatMessages && chatMessages.current) {
-        chatMessages.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+        chatMessages.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+          inline: "nearest",
+        });
       }
     }, 10);
 
@@ -166,7 +169,6 @@ export default function Chatbot() {
 
   return (
     <>
-      {/* FAB Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-4 right-4 inline-flex items-center justify-center text-sm font-medium disabled:pointer-events-none disabled:opacity-50 border rounded-full w-16 h-16 bg-black hover:bg-gray-700 m-0 cursor-pointer border-gray-200 bg-none p-0 normal-case leading-5 hover:text-gray-900"
@@ -195,9 +197,12 @@ export default function Chatbot() {
       {isOpen && (
         <div className="fixed bottom-[calc(4rem+1.5rem)] right-0 mr-4 bg-white p-6 rounded-lg border border-[#e5e7eb] w-2/3 h-[634px] shadow-sm flex flex-col">
           <div className="flex flex-col space-y-1.5 pb-6">
-            <h2 className="font-semibold text-lg tracking-tight">Algolia Transformations Chatbot</h2>
+            <h2 className="font-semibold text-lg tracking-tight">
+              Algolia Transformations Chatbot
+            </h2>
             <p className="text-md text-[#6b7280] leading-6">
-              Start typing to find existing data tranformations or generate a new one
+              Start typing to find existing data tranformations or generate a
+              new one
             </p>
           </div>
 
