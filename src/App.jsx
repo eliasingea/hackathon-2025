@@ -54,7 +54,7 @@ const generateAITransformation = async (description) => {
     }
     if (response.ok) {
       const data = await response.json();
-      return data.output_text;
+      return data.output_text.replaceAll("```", "").replace("javascript", "");
     }
   } catch (error) {
     console.error("Error generating transformation:", error);
@@ -70,12 +70,13 @@ const generateBotMessage = async (state) => {
   };
 
   if (typeof stepResult === "string") {
-    let prompt = '';
+    let prompt = "";
     if (stepResult === "ask_transformation_description") {
-      prompt = 'What kind of transformation are you trying to accomplish?';
+      prompt = "What kind of transformation are you trying to accomplish?";
     } else {
       state.intent = true;
-      prompt = 'Can you describe in detail what transformation you want and I can generate one for you?';
+      prompt =
+        "Can you describe in detail what transformation you want and I can generate one for you?";
     }
     return { ...message, text: prompt };
   } else if (stepResult.step === "show_existing_transformation") {
