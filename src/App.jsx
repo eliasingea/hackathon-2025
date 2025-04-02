@@ -56,23 +56,27 @@ const generateAITransformation = async (description) => {
 const generateBotMessage = async (state) => {
   const stepResult = evaluateNextStep(state);
 
+  let message = {
+    text: ''
+  };
+
   if (typeof stepResult === "string") {
     switch (stepResult) {
       case "ask_transformation_description":
-        return "What kind of transformation are you trying to accomplish?";
+        return { ...message, text: 'What kind of transformation are you trying to accomplish?' };
       case "generate_new_transformation": {
         // const aiCode = await generateAITransformation(
         //   state.entities.transformationRequest
         // );
-        return `Here's a transformation based on your request:\n${"aiCode"}`;
+        return { ...message, text: 'Here\'s a transformation based on your request:', code: '' };
       }
       default:
-        return "I'm not sure how to help yet.";
+        return { ...message, text: 'I\'m not sure how to help yet.' };
     }
   }
 
   if (stepResult.step === "show_existing_transformation") {
-    return `I found a transformation that matches your request:\n${stepResult.code}`;
+    return { ...message, text: 'I found a transformation that matches your request:\n', code: stepResult.code };
   }
 };
 
@@ -115,7 +119,7 @@ export default function Chatbot() {
     } else {
       selectedText = input;
     }
-    const userMessage = { from: "user", message: selectedText };
+    const userMessage = { from: "user", message: { text: selectedText } };
     newState = { ...state, history: [...state.history, userMessage] };
     newState.entities.transformationRequest = selectedText;
 
@@ -196,12 +200,18 @@ export default function Chatbot() {
                     </svg>
                   </div>
                 </span>
-                <p className="leading-relaxed">
+                <div className="leading-relaxed">
                   <span className="block font-bold text-gray-700">
                     {msg.from === "bot" ? "AI" : "You"}
                   </span>
-                  {msg.message}
-                </p>
+                  {msg.message.text}
+                  {msg.message.code && (
+                  <div>
+                    <pre className="mt-4 mb-2">{msg.message.code}</pre>
+                    <button onClick={() => navigator.clipboard.writeText(msg.message.code)}>Copy</button>
+                  </div>
+                  )}
+                </div>
               </div>
             ))}
             {loading && (
