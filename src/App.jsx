@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { algoliasearch } from "algoliasearch";
 
 const searchClient = algoliasearch(
@@ -104,6 +104,8 @@ export default function Chatbot() {
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
+  const chatMessages = useRef(null);
+
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (input.trim().length > 1) {
@@ -147,6 +149,13 @@ export default function Chatbot() {
       message: await generateBotMessage(newState),
     };
     setLoading(false);
+
+    // scroll to the bottom after the messages are added to the DOM
+    setTimeout(() => {
+      if (chatMessages && chatMessages.current) {
+        chatMessages.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+      }
+    }, 10);
 
     setState({ ...newState, history: [...newState.history, botMessage] });
     setInput("");
@@ -196,6 +205,7 @@ export default function Chatbot() {
           >
             {state.history.map((msg, i) => (
               <div
+                ref={chatMessages}
                 key={i}
                 className="flex gap-3 my-4 text-gray-600 text-sm flex-1"
               >
@@ -229,7 +239,7 @@ export default function Chatbot() {
                     <div>
                       <pre className="mt-4 mb-2">{msg.message.code}</pre>
                       <button
-                        className="outline-2 outline-blue-500"
+                        className="mb-2 outline-2 outline-blue-500"
                         onClick={() =>
                           navigator.clipboard.writeText(msg.message.code)
                         }
