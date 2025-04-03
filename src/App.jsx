@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { algoliasearch } from "algoliasearch";
 
-const searchClient = algoliasearch(
-  "1O071SLCFD",
-  "8e0c05de6ee92174f50db39e199ec9b8"
-);
+const searchClient = algoliasearch("1O071SLCFD", "");
 const indexName = "prod_transformations_en";
 
 const initialState = {
